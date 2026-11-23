@@ -1,0 +1,12 @@
+build/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+*.suo
+*.user
+.DS_Store
+.vscode/
+.idea/
+*.vst3
+*.component
+*.app
