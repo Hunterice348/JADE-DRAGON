@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Копирование только при локальной сборке, не на CI
+# Не копировать в системные папки на CI сервере (нет прав)
 if(DEFINED ENV{CI})
     set(COPY_AFTER_BUILD FALSE)
 else()
@@ -80,10 +80,4 @@ if(MSVC)
     target_compile_definitions(JADE_DRAGON PRIVATE _USE_MATH_DEFINES)
 else()
     target_compile_options(JADE_DRAGON PRIVATE -Wall -Wextra -Wpedantic)
-endif()
-
-if(APPLE)
-    set_target_properties(JADE_DRAGON PROPERTIES
-        XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD "c++17"
-    )
 endif()
