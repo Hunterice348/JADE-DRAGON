@@ -1,31 +1,34 @@
 cmake_minimum_required(VERSION 3.22)
-project(JADE_DRAGON VERSION 1.0.0 LANGUAGES CXX)
+
+project(JADE_DRAGON VERSION 2.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
+
 FetchContent_Declare(
     JUCE
     GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
     GIT_TAG 8.0.6
-    GIT_SHALLOW TRUE
 )
+
 FetchContent_MakeAvailable(JUCE)
 
 juce_add_plugin(JADE_DRAGON
     COMPANY_NAME "Hunterice Records"
-    BUNDLE_ID "com.huntericerecords.jadedragon"
+    BUNDLE_ID "com.hunterice.jadedragon"
     PLUGIN_MANUFACTURER_CODE Hntr
-    PLUGIN_CODE Jdgn
-    FORMATS VST3 Standalone
+    PLUGIN_CODE Jd20
     PRODUCT_NAME "JADE DRAGON"
-    DESCRIPTION "Chinese-inspired virtual instrument"
+
+    FORMATS VST3 Standalone
+
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
+
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
     COPY_PLUGIN_AFTER_BUILD FALSE
 )
@@ -33,12 +36,11 @@ juce_add_plugin(JADE_DRAGON
 juce_generate_juce_header(JADE_DRAGON)
 
 target_sources(JADE_DRAGON PRIVATE
+    Source/PluginProcessor.h
     Source/PluginProcessor.cpp
+    Source/PluginEditor.h
     Source/PluginEditor.cpp
-    Source/Synth/DragonVoice.cpp
 )
-
-target_include_directories(JADE_DRAGON PRIVATE Source)
 
 target_compile_definitions(JADE_DRAGON PUBLIC
     JUCE_WEB_BROWSER=0
@@ -51,7 +53,7 @@ target_link_libraries(JADE_DRAGON PRIVATE
     juce::juce_audio_processors
     juce::juce_dsp
     juce::juce_gui_extra
-    PUBLIC juce::juce_recommended_config_flags
-           juce::juce_recommended_lto_flags
-           juce::juce_recommended_warning_flags
+    PUBLIC
+    juce::juce_recommended_config_flags
+    juce::juce_recommended_warning_flags
 )
