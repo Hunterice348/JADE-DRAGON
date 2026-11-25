@@ -8,7 +8,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Автоматическое определение среды: не копировать в системные папки на CI
 if(DEFINED ENV{CI})
     set(COPY_AFTER_BUILD FALSE)
 else()
