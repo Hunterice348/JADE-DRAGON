@@ -1,9 +1,14 @@
+
 cmake_minimum_required(VERSION 3.22)
 
-project(JADE_DRAGON VERSION 2.0.0 LANGUAGES CXX)
+project(JADE_DRAGON VERSION 2.0.1 LANGUAGES C CXX)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
 
@@ -48,12 +53,24 @@ target_compile_definitions(JADE_DRAGON PUBLIC
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
-target_link_libraries(JADE_DRAGON PRIVATE
-    juce::juce_audio_utils
-    juce::juce_audio_processors
-    juce::juce_dsp
-    juce::juce_gui_extra
+target_link_libraries(JADE_DRAGON
+    PRIVATE
+        juce::juce_audio_utils
+        juce::juce_audio_processors
+        juce::juce_dsp
+        juce::juce_gui_extra
+
     PUBLIC
-    juce::juce_recommended_config_flags
-    juce::juce_recommended_warning_flags
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags
 )
+
+if(MSVC)
+    target_compile_options(JADE_DRAGON PRIVATE /W4)
+else()
+    target_compile_options(JADE_DRAGON PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+endif()
