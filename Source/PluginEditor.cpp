@@ -5,18 +5,14 @@
 
 namespace
 {
-    const juce::Colour black     { 0xff061411 };
-    const juce::Colour deepJade  { 0xff092a23 };
-    const juce::Colour jade      { 0xff147d65 };
-    const juce::Colour lightJade { 0xff65e8bd };
-    const juce::Colour gold      { 0xffd9b66e };
-    const juce::Colour paleGold  { 0xffffe6a8 };
-    const juce::Colour ivory     { 0xffeee9d6 };
+    const juce::Colour black{ 0xff061411 };
+    const juce::Colour deepJade{ 0xff092a23 };
+    const juce::Colour jade{ 0xff147d65 };
+    const juce::Colour lightJade{ 0xff65e8bd };
+    const juce::Colour gold{ 0xffd9b66e };
+    const juce::Colour paleGold{ 0xffffe6a8 };
+    const juce::Colour ivory{ 0xffeee9d6 };
 }
-
-// ===================================================================
-// LOOK & FEEL
-// ===================================================================
 
 JadeLookAndFeel::JadeLookAndFeel()
 {
@@ -42,22 +38,15 @@ void JadeLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int widt
 
     g.setColour(juce::Colours::black.withAlpha(0.60f));
     g.fillEllipse(knob.translated(0.0f, 5.0f));
-
-    g.setGradientFill(juce::ColourGradient(paleGold, cx - radius, cy - radius,
-        juce::Colour(0xff70502a), cx + radius, cy + radius, false));
+    g.setGradientFill(juce::ColourGradient(paleGold, cx - radius, cy - radius, juce::Colour(0xff70502a), cx + radius, cy + radius, false));
     g.fillEllipse(knob);
 
     const auto inner = knob.reduced(4.0f);
-    g.setGradientFill(juce::ColourGradient(juce::Colour(0xff39b894),
-        cx - radius * 0.55f, cy - radius * 0.65f, juce::Colour(0xff061d18),
-        cx + radius * 0.55f, cy + radius * 0.65f, false));
+    g.setGradientFill(juce::ColourGradient(juce::Colour(0xff39b894), cx - radius * 0.55f, cy - radius * 0.65f, juce::Colour(0xff061d18), cx + radius * 0.55f, cy + radius * 0.65f, false));
     g.fillEllipse(inner);
 
     juce::Path highlightArc;
-    highlightArc.addArc(inner.getX() + 5.0f, inner.getY() + 5.0f,
-        inner.getWidth() - 10.0f, inner.getHeight() - 10.0f,
-        juce::MathConstants<float>::pi * 1.15f,
-        juce::MathConstants<float>::pi * 1.85f, true);
+    highlightArc.addArc(inner.getX() + 5.0f, inner.getY() + 5.0f, inner.getWidth() - 10.0f, inner.getHeight() - 10.0f, juce::MathConstants<float>::pi * 1.15f, juce::MathConstants<float>::pi * 1.85f, true);
     g.strokePath(highlightArc, juce::PathStrokeType(2.0f));
 
     for (int i = 0; i <= 20; ++i)
@@ -83,10 +72,6 @@ void JadeLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int widt
     g.setColour(paleGold);
     g.fillEllipse(cx - 2.0f, cy - 2.0f, 4.0f, 4.0f);
 }
-
-// ===================================================================
-// EDITOR
-// ===================================================================
 
 JADEDRAGONAudioProcessorEditor::JADEDRAGONAudioProcessorEditor(JADEDRAGONAudioProcessor& p)
     : AudioProcessorEditor(&p), processor(p)
@@ -114,16 +99,9 @@ JADEDRAGONAudioProcessorEditor::JADEDRAGONAudioProcessorEditor(JADEDRAGONAudioPr
     instrumentSelector.addItem("JADE BELLS", 6);
     addAndMakeVisible(instrumentSelector);
 
-    setupSlider(attack, "ATTACK");
-    setupSlider(decay, "DECAY");
-    setupSlider(sustain, "SUSTAIN");
-    setupSlider(release, "RELEASE");
-    setupSlider(brightness, "BRIGHTNESS");
-    setupSlider(drive, "DRIVE");
-    setupSlider(chorus, "CHORUS");
-    setupSlider(reverb, "REVERB");
-    setupSlider(delay, "DELAY");
-    setupSlider(master, "MASTER");
+    setupSlider(attack, "ATTACK"); setupSlider(decay, "DECAY"); setupSlider(sustain, "SUSTAIN");
+    setupSlider(release, "RELEASE"); setupSlider(brightness, "BRIGHTNESS"); setupSlider(drive, "DRIVE");
+    setupSlider(chorus, "CHORUS"); setupSlider(reverb, "REVERB"); setupSlider(delay, "DELAY"); setupSlider(master, "MASTER");
 
     auto& state = processor.parameters;
     instrumentAttachment = std::make_unique<ComboAttachment>(state, "instrument", instrumentSelector);
@@ -152,12 +130,7 @@ void JADEDRAGONAudioProcessorEditor::setupSlider(juce::Slider& slider, const juc
     addAndMakeVisible(slider);
 }
 
-// ===================================================================
-// 3D JADE CORE VISUALIZER
-// ===================================================================
-
-void JADEDRAGONAudioProcessorEditor::draw3DJadeCore(juce::Graphics& g,
-                                                     juce::Rectangle<float> area, float audioLevel)
+void JADEDRAGONAudioProcessorEditor::draw3DJadeCore(juce::Graphics& g, juce::Rectangle<float> area, float audioLevel)
 {
     const float cx = area.getCentreX();
     const float cy = area.getCentreY();
@@ -198,8 +171,7 @@ void JADEDRAGONAudioProcessorEditor::draw3DJadeCore(juce::Graphics& g,
         }
     }
 
-    std::sort(points.begin(), points.end(),
-        [](const ProjectedPoint& a, const ProjectedPoint& b) { return a.z > b.z; });
+    std::sort(points.begin(), points.end(), [](const ProjectedPoint& a, const ProjectedPoint& b) { return a.z > b.z; });
 
     for (const auto& pt : points)
     {
@@ -212,27 +184,18 @@ void JADEDRAGONAudioProcessorEditor::draw3DJadeCore(juce::Graphics& g,
     }
 
     g.setColour(lightJade.withAlpha(0.15f + audioLevel * 0.2f));
-    g.drawEllipse(cx - baseRadius * 0.8f, cy - baseRadius * 0.8f,
-                  baseRadius * 1.6f, baseRadius * 1.6f, 1.5f);
+    g.drawEllipse(cx - baseRadius * 0.8f, cy - baseRadius * 0.8f, baseRadius * 1.6f, baseRadius * 1.6f, 1.5f);
 }
-
-// ===================================================================
-// PAINT
-// ===================================================================
 
 void JADEDRAGONAudioProcessorEditor::paint(juce::Graphics& g)
 {
     auto bounds = getLocalBounds().toFloat();
-
-    g.setGradientFill(juce::ColourGradient(juce::Colour(0xff143c30), 0.0f, 0.0f,
-        black, 0.0f, static_cast<float>(getHeight()), false));
+    g.setGradientFill(juce::ColourGradient(juce::Colour(0xff143c30), 0.0f, 0.0f, black, 0.0f, static_cast<float>(getHeight()), false));
     g.fillAll();
 
     g.setColour(lightJade.withAlpha(0.035f));
-    for (int x = 0; x < getWidth(); x += 36)
-        g.drawVerticalLine(x, 0.0f, static_cast<float>(getHeight()));
-    for (int y = 0; y < getHeight(); y += 36)
-        g.drawHorizontalLine(y, 0.0f, static_cast<float>(getWidth()));
+    for (int x = 0; x < getWidth(); x += 36) g.drawVerticalLine(x, 0.0f, static_cast<float>(getHeight()));
+    for (int y = 0; y < getHeight(); y += 36) g.drawHorizontalLine(y, 0.0f, static_cast<float>(getWidth()));
 
     g.setColour(gold.withAlpha(0.85f));
     g.drawRoundedRectangle(bounds.reduced(9.0f), 18.0f, 2.0f);
@@ -241,10 +204,8 @@ void JADEDRAGONAudioProcessorEditor::paint(juce::Graphics& g)
 
     const float corner = 38.0f;
     g.setColour(gold);
-    for (int sx : { 1, -1 })
-    {
-        for (int sy : { 1, -1 })
-        {
+    for (int sx : { 1, -1 }) {
+        for (int sy : { 1, -1 }) {
             const float x = sx > 0 ? 20.0f : static_cast<float>(getWidth()) - 20.0f;
             const float y = sy > 0 ? 20.0f : static_cast<float>(getHeight()) - 20.0f;
             g.drawLine(x, y, x + sx * corner, y, 2.0f);
@@ -264,8 +225,7 @@ void JADEDRAGONAudioProcessorEditor::paint(juce::Graphics& g)
     g.drawRoundedRectangle(24.0f, 500.0f, static_cast<float>(getWidth()) - 48.0f, 210.0f, 15.0f, 1.0f);
 
     smoothLevel += (processor.currentLevel.load() - smoothLevel) * 0.2f;
-    draw3DJadeCore(g, juce::Rectangle<float>(
-        static_cast<float>(getWidth()) * 0.5f - 120.0f, 90.0f, 240.0f, 170.0f), smoothLevel);
+    draw3DJadeCore(g, juce::Rectangle<float>(static_cast<float>(getWidth()) * 0.5f - 120.0f, 90.0f, 240.0f, 170.0f), smoothLevel);
 
     g.setColour(paleGold);
     g.setFont(juce::Font(juce::FontOptions(13.0f, juce::Font::bold)));
@@ -274,8 +234,7 @@ void JADEDRAGONAudioProcessorEditor::paint(juce::Graphics& g)
 
     g.setColour(lightJade.withAlpha(0.7f));
     g.setFont(juce::Font(juce::FontOptions(10.0f)));
-    g.drawText("HUNTERICE RECORDS     |     JADE DRAGON V2.1", 0,
-               getHeight() - 25, getWidth(), 15, juce::Justification::centred);
+    g.drawText("HUNTERICE RECORDS     |     JADE DRAGON V2.1", 0, getHeight() - 25, getWidth(), 15, juce::Justification::centred);
 }
 
 void JADEDRAGONAudioProcessorEditor::resized()
@@ -290,16 +249,13 @@ void JADEDRAGONAudioProcessorEditor::resized()
     juce::Slider* top[] = { &attack, &decay, &sustain, &release, &brightness };
     juce::Slider* bottom[] = { &drive, &chorus, &reverb, &delay, &master };
 
-    for (int i = 0; i < 5; ++i)
-        top[i]->setBounds(startX + i * (sliderWidth + gap), 310, sliderWidth, sliderHeight);
-    for (int i = 0; i < 5; ++i)
-        bottom[i]->setBounds(startX + i * (sliderWidth + gap), 535, sliderWidth, sliderHeight);
+    for (int i = 0; i < 5; ++i) top[i]->setBounds(startX + i * (sliderWidth + gap), 310, sliderWidth, sliderHeight);
+    for (int i = 0; i < 5; ++i) bottom[i]->setBounds(startX + i * (sliderWidth + gap), 535, sliderWidth, sliderHeight);
 }
 
 void JADEDRAGONAudioProcessorEditor::timerCallback()
 {
     rotation += 0.015f;
-    if (rotation >= juce::MathConstants<float>::twoPi)
-        rotation -= juce::MathConstants<float>::twoPi;
+    if (rotation >= juce::MathConstants<float>::twoPi) rotation -= juce::MathConstants<float>::twoPi;
     repaint();
 }
