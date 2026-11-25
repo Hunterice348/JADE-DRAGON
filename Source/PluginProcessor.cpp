@@ -7,10 +7,6 @@ namespace
     constexpr float pi = juce::MathConstants<float>::pi;
 }
 
-// ===================================================================
-// VOICE ENGINE
-// ===================================================================
-
 JadeDragonVoice::JadeDragonVoice(std::atomic<float>* inst, std::atomic<float>* a, std::atomic<float>* d,
                                  std::atomic<float>* s, std::atomic<float>* r, std::atomic<float>* b,
                                  std::atomic<float>* drv, std::atomic<float>* cho)
@@ -80,23 +76,12 @@ float JadeDragonVoice::generateTone(int type, double p, float noise)
     const float f = static_cast<float>(p);
     switch (type)
     {
-        case 0: // Guzheng
-            return std::sin(f) + 0.55f * std::sin(f * 2.0f) + 0.30f * std::sin(f * 3.0f) +
-                   0.17f * std::sin(f * 4.0f) + 0.08f * std::sin(f * 6.0f);
-        case 1: // Erhu
-            return std::sin(f) + 0.42f * std::sin(f * 2.0f) + 0.20f * std::sin(f * 3.0f) +
-                   0.10f * std::sin(f * 4.0f) + noise * 0.03f;
-        case 2: // Dizi
-            return std::sin(f) + 0.17f * std::sin(f * 2.0f) + 0.05f * std::sin(f * 3.0f) + noise * 0.15f;
-        case 3: // Pipa
-            return std::sin(f) + 0.68f * std::sin(f * 2.0f) + 0.42f * std::sin(f * 3.0f) +
-                   0.24f * std::sin(f * 4.0f) + 0.13f * std::sin(f * 7.0f);
-        case 4: // Gong
-            return std::sin(f) + 0.72f * std::sin(f * 2.17f) + 0.47f * std::sin(f * 3.42f) +
-                   0.27f * std::sin(f * 4.71f) + 0.15f * std::sin(f * 6.83f);
-        case 5: // Jade Bells
-            return std::sin(f) + 0.70f * std::sin(f * 2.76f) + 0.34f * std::sin(f * 5.40f) +
-                   0.19f * std::sin(f * 8.93f) + 0.08f * std::sin(f * 12.2f);
+        case 0: return std::sin(f) + 0.55f * std::sin(f * 2.0f) + 0.30f * std::sin(f * 3.0f) + 0.17f * std::sin(f * 4.0f) + 0.08f * std::sin(f * 6.0f);
+        case 1: return std::sin(f) + 0.42f * std::sin(f * 2.0f) + 0.20f * std::sin(f * 3.0f) + 0.10f * std::sin(f * 4.0f) + noise * 0.03f;
+        case 2: return std::sin(f) + 0.17f * std::sin(f * 2.0f) + 0.05f * std::sin(f * 3.0f) + noise * 0.15f;
+        case 3: return std::sin(f) + 0.68f * std::sin(f * 2.0f) + 0.42f * std::sin(f * 3.0f) + 0.24f * std::sin(f * 4.0f) + 0.13f * std::sin(f * 7.0f);
+        case 4: return std::sin(f) + 0.72f * std::sin(f * 2.17f) + 0.47f * std::sin(f * 3.42f) + 0.27f * std::sin(f * 4.71f) + 0.15f * std::sin(f * 6.83f);
+        case 5: return std::sin(f) + 0.70f * std::sin(f * 2.76f) + 0.34f * std::sin(f * 5.40f) + 0.19f * std::sin(f * 8.93f) + 0.08f * std::sin(f * 12.2f);
         default: return std::sin(f);
     }
 }
@@ -114,9 +99,7 @@ void JadeDragonVoice::renderNextBlock(juce::AudioBuffer<float>& buffer, int star
     const double increment = twoPi * bentFrequency / sampleRate;
 
     const float cutoff = 350.0f + bright * 15000.0f;
-    const float filterCoef = juce::jlimit(0.001f, 0.99f,
-        1.0f - std::exp(-2.0f * pi * cutoff / static_cast<float>(sampleRate)));
-
+    const float filterCoef = juce::jlimit(0.001f, 0.99f, 1.0f - std::exp(-2.0f * pi * cutoff / static_cast<float>(sampleRate)));
     const float resonance = 0.4f + bright * 0.5f;
     const float saturation = 1.0f + driveAmount * 12.0f;
 
@@ -133,15 +116,12 @@ void JadeDragonVoice::renderNextBlock(juce::AudioBuffer<float>& buffer, int star
         if (type == 0 || type == 3) tone += noise * transient * 0.12f;
         if (type == 2) tone += noise * 0.15f;
 
-        // 2-pole resonant lowpass filter simulation
         filterState1 += filterCoef * (tone - filterState1);
-        filterState2 += filterCoef * (filterState1 - filterState2 +
-                       resonance * (filterState1 - filterState2) * 0.3f);
+        filterState2 += filterCoef * (filterState1 - filterState2 + resonance * (filterState1 - filterState2) * 0.3f);
 
         float sample = filterState2;
         sample = softClip(sample * saturation);
 
-        // Chorus effect for Erhu
         if (type == 1 && chorusAmt > 0.01f)
         {
             lfoPhase += 2.0f * pi * 5.0f / static_cast<float>(sampleRate);
@@ -160,40 +140,22 @@ void JadeDragonVoice::renderNextBlock(juce::AudioBuffer<float>& buffer, int star
     }
 }
 
-// ===================================================================
-// PROCESSOR
-// ===================================================================
-
-juce::AudioProcessorValueTreeState::ParameterLayout
-JADEDRAGONAudioProcessor::createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout JADEDRAGONAudioProcessor::createParameterLayout()
 {
     using Float = juce::AudioParameterFloat;
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    layout.add(std::make_unique<juce::AudioParameterChoice>(
-        juce::ParameterID { "instrument", 1 }, "Instrument",
-        juce::StringArray { "Guzheng", "Erhu", "Dizi", "Pipa", "Gong", "Jade Bells" }, 0));
-
-    layout.add(std::make_unique<Float>(juce::ParameterID { "attack", 1 }, "Attack",
-        juce::NormalisableRange<float>(0.001f, 5.0f, 0.001f, 0.3f), 0.025f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "decay", 1 }, "Decay",
-        juce::NormalisableRange<float>(0.01f, 5.0f, 0.01f, 0.4f), 0.45f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "sustain", 1 }, "Sustain",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.72f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "release", 1 }, "Release",
-        juce::NormalisableRange<float>(0.01f, 10.0f, 0.01f, 0.5f), 1.2f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "brightness", 1 }, "Brightness",
-        juce::NormalisableRange<float>(0.02f, 1.0f, 0.01f), 0.72f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "drive", 1 }, "Drive",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.08f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "chorus", 1 }, "Chorus",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.3f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "reverb", 1 }, "Reverb",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.32f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "delay", 1 }, "Delay",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.12f));
-    layout.add(std::make_unique<Float>(juce::ParameterID { "master", 1 }, "Master",
-        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.8f));
+    layout.add(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID { "instrument", 1 }, "Instrument", juce::StringArray { "Guzheng", "Erhu", "Dizi", "Pipa", "Gong", "Jade Bells" }, 0));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "attack", 1 }, "Attack", juce::NormalisableRange<float>(0.001f, 5.0f, 0.001f, 0.3f), 0.025f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "decay", 1 }, "Decay", juce::NormalisableRange<float>(0.01f, 5.0f, 0.01f, 0.4f), 0.45f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "sustain", 1 }, "Sustain", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.72f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "release", 1 }, "Release", juce::NormalisableRange<float>(0.01f, 10.0f, 0.01f, 0.5f), 1.2f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "brightness", 1 }, "Brightness", juce::NormalisableRange<float>(0.02f, 1.0f, 0.01f), 0.72f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "drive", 1 }, "Drive", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.08f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "chorus", 1 }, "Chorus", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.3f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "reverb", 1 }, "Reverb", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.32f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "delay", 1 }, "Delay", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.12f));
+    layout.add(std::make_unique<Float>(juce::ParameterID { "master", 1 }, "Master", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.8f));
 
     return layout;
 }
@@ -205,14 +167,10 @@ JADEDRAGONAudioProcessor::JADEDRAGONAudioProcessor()
     for (int i = 0; i < 16; ++i)
     {
         synth.addVoice(new JadeDragonVoice(
-            parameters.getRawParameterValue("instrument"),
-            parameters.getRawParameterValue("attack"),
-            parameters.getRawParameterValue("decay"),
-            parameters.getRawParameterValue("sustain"),
-            parameters.getRawParameterValue("release"),
-            parameters.getRawParameterValue("brightness"),
-            parameters.getRawParameterValue("drive"),
-            parameters.getRawParameterValue("chorus")));
+            parameters.getRawParameterValue("instrument"), parameters.getRawParameterValue("attack"),
+            parameters.getRawParameterValue("decay"), parameters.getRawParameterValue("sustain"),
+            parameters.getRawParameterValue("release"), parameters.getRawParameterValue("brightness"),
+            parameters.getRawParameterValue("drive"), parameters.getRawParameterValue("chorus")));
     }
     synth.addSound(new JadeDragonSound());
 }
@@ -245,7 +203,6 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 {
     juce::ScopedNoDenormals noDenormals;
     buffer.clear();
-
     synth.renderNextBlock(buffer, midi, 0, buffer.getNumSamples());
 
     const int samples = buffer.getNumSamples();
@@ -254,7 +211,6 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
     const float reverbAmt = parameters.getRawParameterValue("reverb")->load();
     const float master = parameters.getRawParameterValue("master")->load();
 
-    // Delay Effect
     if (channels == 2 && !delayBuffer[0].empty())
     {
         float* left = buffer.getWritePointer(0);
@@ -273,12 +229,10 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
             left[i] += echoL * delayAmt * 0.55f;
             right[i] += echoR * delayAmt * 0.55f;
-
             delayPosition = (delayPosition + 1) % size;
         }
     }
 
-    // Reverb Effect
     if (reverbAmt > 0.001f)
     {
         auto rp = reverb.getParameters();
@@ -286,20 +240,12 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
         rp.dryLevel = 1.0f - reverbAmt * 0.25f;
         reverb.setParameters(rp);
 
-        if (channels == 2)
-        {
-            reverb.processStereo(buffer.getWritePointer(0),
-                                 buffer.getWritePointer(1), samples);
-        }
-        else if (channels == 1)
-        {
-            reverb.processMono(buffer.getWritePointer(0), samples);
-        }
+        if (channels == 2) reverb.processStereo(buffer.getWritePointer(0), buffer.getWritePointer(1), samples);
+        else if (channels == 1) reverb.processMono(buffer.getWritePointer(0), samples);
     }
 
     buffer.applyGain(master);
 
-    // Calculate RMS for Visualizer
     float rms = 0.0f;
     for (int ch = 0; ch < channels; ++ch)
     {
@@ -325,12 +271,5 @@ void JADEDRAGONAudioProcessor::setStateInformation(const void* data, int size)
         parameters.replaceState(juce::ValueTree::fromXml(*xml));
 }
 
-juce::AudioProcessorEditor* JADEDRAGONAudioProcessor::createEditor()
-{
-    return new JADEDRAGONAudioProcessorEditor(*this);
-}
-
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new JADEDRAGONAudioProcessor();
-}
+juce::AudioProcessorEditor* JADEDRAGONAudioProcessor::createEditor() { return new JADEDRAGONAudioProcessorEditor(*this); }
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new JADEDRAGONAudioProcessor(); }
