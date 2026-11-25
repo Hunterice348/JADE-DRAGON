@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <atomic>
+#include <cmath>
 
 class JadeDragonVoice final : public juce::SynthesiserVoice
 {
@@ -23,19 +24,18 @@ public:
 private:
     float generateTone(int type, double p, float noise);
     float nextNoise();
+    static float softClip(float x) { return std::tanh(x); }
 
-    std::atomic<float>* instrument;
-    std::atomic<float>* attack;
-    std::atomic<float>* decay;
-    std::atomic<float>* sustain;
-    std::atomic<float>* release;
-    std::atomic<float>* brightness;
-    std::atomic<float>* drive;
-    std::atomic<float>* chorusMix;
+    std::atomic<float>* instrument = nullptr;
+    std::atomic<float>* attack = nullptr;
+    std::atomic<float>* decay = nullptr;
+    std::atomic<float>* sustain = nullptr;
+    std::atomic<float>* release = nullptr;
+    std::atomic<float>* brightness = nullptr;
+    std::atomic<float>* drive = nullptr;
+    std::atomic<float>* chorusMix = nullptr;
 
     juce::ADSR envelope;
-    juce::dsp::FirstOrderTPTFilter<float> lowpassFilter;
-    juce::dsp::Oscillator<float> lfo;
 
     double phase = 0.0;
     double frequency = 440.0;
@@ -44,6 +44,8 @@ private:
     float pitchBend = 0.0f;
     float previousSample = 0.0f;
     float pluckAmount = 0.0f;
+    float filterState1 = 0.0f;
+    float filterState2 = 0.0f;
     float lfoPhase = 0.0f;
     uint32_t noiseState = 0x12345678u;
 
@@ -93,8 +95,10 @@ private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
     juce::Synthesiser synth;
-    juce::dsp::Reverb reverb;
-    juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delayLine;
+    juce::Reverb reverb;
+
+    std::array<std::vector<float>, 2> delayBuffer;
+    int delayPosition = 0;
     double currentSampleRate = 44100.0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JADEDRAGONAudioProcessor)
