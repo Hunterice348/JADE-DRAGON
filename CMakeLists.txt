@@ -1,11 +1,9 @@
-
 cmake_minimum_required(VERSION 3.22)
 
-project(JADE_DRAGON VERSION 2.0.1 LANGUAGES C CXX)
+project(JADE_DRAGON VERSION 2.1.0 LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -24,7 +22,7 @@ juce_add_plugin(JADE_DRAGON
     COMPANY_NAME "Hunterice Records"
     BUNDLE_ID "com.hunterice.jadedragon"
     PLUGIN_MANUFACTURER_CODE Hntr
-    PLUGIN_CODE Jd20
+    PLUGIN_CODE Jd21
     PRODUCT_NAME "JADE DRAGON"
 
     FORMATS VST3 Standalone
@@ -35,7 +33,7 @@ juce_add_plugin(JADE_DRAGON
     IS_MIDI_EFFECT FALSE
 
     EDITOR_WANTS_KEYBOARD_FOCUS TRUE
-    COPY_PLUGIN_AFTER_BUILD FALSE
+    COPY_PLUGIN_AFTER_BUILD TRUE
 )
 
 juce_generate_juce_header(JADE_DRAGON)
@@ -59,18 +57,13 @@ target_link_libraries(JADE_DRAGON
         juce::juce_audio_processors
         juce::juce_dsp
         juce::juce_gui_extra
-
     PUBLIC
         juce::juce_recommended_config_flags
         juce::juce_recommended_warning_flags
 )
 
 if(MSVC)
-    target_compile_options(JADE_DRAGON PRIVATE /W4)
+    target_compile_options(JADE_DRAGON PRIVATE /W4 /utf-8)
 else()
-    target_compile_options(JADE_DRAGON PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-    )
+    target_compile_options(JADE_DRAGON PRIVATE -Wall -Wextra -Wpedantic)
 endif()
