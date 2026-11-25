@@ -8,7 +8,7 @@ namespace
 }
 
 // ===================================================================
-// VOICE
+// VOICE ENGINE
 // ===================================================================
 
 JadeDragonVoice::JadeDragonVoice(std::atomic<float>* inst, std::atomic<float>* a, std::atomic<float>* d,
@@ -133,7 +133,7 @@ void JadeDragonVoice::renderNextBlock(juce::AudioBuffer<float>& buffer, int star
         if (type == 0 || type == 3) tone += noise * transient * 0.12f;
         if (type == 2) tone += noise * 0.15f;
 
-        // 2-pole resonant lowpass filter
+        // 2-pole resonant lowpass filter simulation
         filterState1 += filterCoef * (tone - filterState1);
         filterState2 += filterCoef * (filterState1 - filterState2 +
                        resonance * (filterState1 - filterState2) * 0.3f);
@@ -141,7 +141,7 @@ void JadeDragonVoice::renderNextBlock(juce::AudioBuffer<float>& buffer, int star
         float sample = filterState2;
         sample = softClip(sample * saturation);
 
-        // Chorus for Erhu
+        // Chorus effect for Erhu
         if (type == 1 && chorusAmt > 0.01f)
         {
             lfoPhase += 2.0f * pi * 5.0f / static_cast<float>(sampleRate);
@@ -254,7 +254,7 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
     const float reverbAmt = parameters.getRawParameterValue("reverb")->load();
     const float master = parameters.getRawParameterValue("master")->load();
 
-    // Delay (только для stereo)
+    // Delay Effect
     if (channels == 2 && !delayBuffer[0].empty())
     {
         float* left = buffer.getWritePointer(0);
@@ -278,7 +278,7 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
         }
     }
 
-    // Reverb
+    // Reverb Effect
     if (reverbAmt > 0.001f)
     {
         auto rp = reverb.getParameters();
@@ -299,7 +299,7 @@ void JADEDRAGONAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
     buffer.applyGain(master);
 
-    // RMS для визуализатора
+    // Calculate RMS for Visualizer
     float rms = 0.0f;
     for (int ch = 0; ch < channels; ++ch)
     {
